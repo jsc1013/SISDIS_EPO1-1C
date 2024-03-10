@@ -153,16 +153,27 @@ public class ChatServerImpl implements ChatServer {
 	}
 
 	/**
-	 * shutdown Cierra el servidor
+	 * shutdown Cierra todos los clientes y el servidor
 	 * 
 	 */
 	@Override
 	public void shutdown() {
+		for (ServerThreadForClient thread : _clientsThreads.values()) {
+			try {
+				if (thread._clientSocket != null) {
+					thread._killThread = true;
+					thread._clientSocket.close();
+				}
+			} catch (IOException e) {
+				System.err.println(
+						"[" + sdf.format(new Date()) + "]" + " - Error ending socket from client " + thread.username);
+			}
+		}
 		try {
-
 			if (server != null) {
 				server.close();
 			}
+
 		} catch (IOException e) {
 			System.err.println("[" + sdf.format(new Date()) + "]" + " - Error shutting down socket server.");
 		}
